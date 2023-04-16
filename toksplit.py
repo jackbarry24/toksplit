@@ -1,4 +1,6 @@
 import tiktoken
+import concurrent.futures
+import os
 
 MODEL = "gpt-3.5-turbo"
 MAX_TOKENS = {
@@ -30,17 +32,25 @@ def encode(text: str, model: str) -> list:
     return encoding
 
 # tokens = TOKENS[MODEL]
-def toksplit(text: str, tokens:int, model:str, decode=True) -> list:
+def toksplit(text: str, tokens: int, model: str, workers=1) -> list:
+
     enc = tiktoken.encoding_for_model(model)
     encoding = enc.encode(text)
 
+    if workers is None:
+        workers = min(len(encoding), os.cpu_count() * 2)
+
     chunks = [encoding[i:i + tokens] for i in range(0, len(encoding), tokens)]
 
-    if decode:
-        decoded = [enc.decode(chunk) for chunk in chunks]
-        return decoded
-    else:
-        return chunks
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+        decs = list(executor.map(enc.decode, chunks))
+
+    return decs
+
+
+
+        
+
     
 
 
