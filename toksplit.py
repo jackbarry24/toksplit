@@ -19,20 +19,32 @@ MAX_TOKENS = {
         "babbage": 2049,
         "ada": 2049 }
 
-def get_tokens(text: str) -> int:
-    enc = tiktoken.encoding_for_model(MODEL)
+def get_tokens(text: str, model: str) -> int:
+    enc = tiktoken.encoding_for_model(model)
     tokens = len(enc.encode(text))
     return tokens
 
+def encode(text: str, model: str) -> list:
+    enc = tiktoken.encoding_for_model(model)
+    encoding = enc.encode(text)
+    return encoding
+
 # tokens = TOKENS[MODEL]
-def toksplit(text: str, tokens: int) -> list:
-    enc = tiktoken.encoding_for_model(MODEL)
+def toksplit(text: str, tokens:int, model:str, decode=True) -> list:
+    enc = tiktoken.encoding_for_model(model)
     encoding = enc.encode(text)
 
     chunks = [encoding[i:i + tokens] for i in range(0, len(encoding), tokens)]
-    decoded = [enc.decode(chunk) for chunk in chunks]
 
-    return decoded
+    if decode:
+        decoded = [enc.decode(chunk) for chunk in chunks]
+        return decoded
+    else:
+        return chunks
+    
+
+
+
 
 
 
